@@ -1,14 +1,22 @@
-//Episode-09 - Encrypting Passwords
+//Episode-10 - Authentication, JWT & Cookies
 
 const express = require("express");
 const connectDB = require("./config/database");
 const User = require("./models/user");
 const bcrypt = require("bcrypt")
 const {validateSignUpData} = require("./utils/validation");
+const cookieParser = require("cookie-parser");
+const jwt = require('jsonwebtoken');
+const {userAuth} = require("./middleware/auth");
+
+
 
 const PORT = "7777";
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
+
+//to read cookie - middleeware - cookieparser
 
 
 app.post("/signup", async (req, res) => {
@@ -49,15 +57,30 @@ app.post('/login', async(req, res) => {
             throw new Error("Invalid email or password!");
         }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        //offloading brcypt to userSchema
+        // const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await user.validatePassword(password);
         if(isPasswordValid){
+
+            //create a jwt token
+            //offloading it to user schema
+            // const token = await jwt.sign({ _id: user._id}, "Dinesh@dev$123", {expiresIn: "7d"});
+            const token = await user.getJWT();
+            console.log("token--", token);
+            
+
+            //add token to cookie and send response back to the user
+            res.cookie("token", token, {
+                expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)  //7 days
+            })
+
             res.send("Login Successfully!");
         }else{
             throw new Error("Invalid password!");
         }
         
     } catch (error) {
-        res.status(400).send(`Error login user: ${error}`);
+        res.status(400).send("Error login user:" +  error);
     }
 })
 
@@ -78,60 +101,21 @@ app.get("/user", async(req, res)=> {
    
 });
 
-app.delete("/user", async(req, res)=> {
-    const userId = req.body.userId;
-    console.log(userId);
-    
+app.get("/profile", userAuth ,async(req, res)=>{
     try {
-        const deletedUser = await User.findOneAndDelete(userId);
-        res.send(`user deleted Successfully: ${deletedUser}`)
-        
+        const user = req.user;
+        res.send(user);
     } catch (error) {
-        res.status(500).send(`Error deleting user: ${error}`);
+        res.status(500).send(`Error finding user ${error}`);
 
-    }
-});
-
-app.patch("/user/:userId", async(req,res)=> {
-
-    const userId = req.params.userId;
-    const data = req.body;
-    console.log(data);
-
-    try {
-        const ALLOWED_UPDATES = ["age", "about", "skills", "photoUrl"];
-        const isUpdateAllowed = Object.keys(data).every((k) => 
-            ALLOWED_UPDATES.includes(k)
-        );
-        if(!isUpdateAllowed){
-            res.status(400).send("Update not allowed!")
-        }
-        if(data?.skills?.length > 10){
-            res.status(400).send("Max 10 skills are allowed!")
-        }
-    } catch (error) {
-        res.status(500).send(`Update user failed!: ${error}`);
-    }
-
-    
-    try {
-        //it'll return document which was before update
-        const patchedUser = await User.findByIdAndUpdate({_id: userId}, data, {returnDocument: "after", runValidators: true} );
-        res.send(`User updated successfully ${patchedUser}`);
-    } catch (error) {
-         res.status(500).send(`Error updating user: ${error}`);
-    }
-})
-
-app.get("/feed", async(req, res)=>{
-    try {
-         const users = await User.find({});
-        res.send(users);
-    } catch (error) {
-        console.error("Error getting user:", error);
-        res.status(500).send(`Error getting user: ${error}`);
     }
    
+});
+
+app.post('/sendConnectionRequest', userAuth,async(req, res)=> {
+    //sending a connection request
+    const user = req.user;
+    res.send("Connection Request Sent!")
 })
 
 connectDB().then(() => {
