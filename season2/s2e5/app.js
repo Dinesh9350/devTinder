@@ -1,4 +1,4 @@
-//Routing and Request handlers
+//--------Routing and Request handlers--------
 
 
 // import express from "express";
@@ -7,12 +7,10 @@ const express = require("express")
 const PORT = "7777";
 const app = express();
 
-app.use('/test', (req, res)=>{
-    res.send("Test dsds!");
-});
 
 
-app.get("/user", (req, res) => {
+
+app.use("/user", (req, res) => {
     // user/:userId/:name/:password
     // //user/07/Dinesh
     console.log(req.params);
