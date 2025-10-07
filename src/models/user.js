@@ -23,13 +23,17 @@ const userSchema = mongoose.Schema({
     },
     gender: {
         type: String,
-         lowercase: true,
-        validate(value){
-            if(!["male", "female"].includes(value)){
-                throw new Error("Gener data is not valid");
-                
-            }
+        lowercase: true,
+        enum: {
+            values: ["male", "female"],
+            message: `{VALUE} is not a valid gender type`
         }
+        // validate(value){
+        //     if(!["male", "female"].includes(value)){
+        //         throw new Error("Gener data is not valid");
+                
+        //     }
+        // }
     },
     email: {
         type: String,
