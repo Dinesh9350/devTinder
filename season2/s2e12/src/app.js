@@ -1,5 +1,4 @@
-//Episode-13 - ref, Populate & Thought process of writing APIs
-
+//Episode-12 -  Logical DB Query & Compound Indexes
 const express = require("express");
 const connectDB = require("./config/database");
 const User = require("./models/user");
@@ -27,7 +26,6 @@ app.use('/', authRouter);
 app.use('/', profileRouter);
 app.use('/', userRouter);
 app.use('/', connectionRequestRouter);
-app.use('/', userRouter)
 
 
 

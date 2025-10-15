@@ -3,12 +3,10 @@ const mongoose = require("mongoose");
 const connectionRequestSchema = mongoose.Schema({
     fromUserId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User", //reference to the user table
         required: true
     },
     toUserId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User", //reference to the user table\
         required: true
     },
     status: {
@@ -20,7 +18,7 @@ const connectionRequestSchema = mongoose.Schema({
         }
     }
 }, {
-    timestamps: true
+    Timestamp: true
 });
 
 //compund index : 1 means Ascending, -1 descending
